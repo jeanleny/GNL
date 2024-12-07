@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: lperis <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/12 18:26:44 by lperis            #+#    #+#             */
-/*   Updated: 2024/11/27 17:32:01 by lperis           ###   ########.fr       */
+/*   Updated: 2024/11/16 16:19:41 by lperis           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
 void	empty_buffer(char **buff, int size)
 {
@@ -38,7 +38,7 @@ char	*_get_line(char **buff)
 		size++;
 	if (buff[0][size] == '\n')
 		size++;
-	line = ft_calloc(size + 1, 1);
+	line = ft_calloc(size + 2, 1);
 	if (!line)
 		return (NULL);
 	while (j < size)
@@ -79,30 +79,32 @@ int	r_line(int fd, char **buff)
 
 char	*get_next_line(int fd)
 {
-	static char	*buff = NULL;
+	static char	*buff[1024];
 	char		*result;
 	int			rl;
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
-	if (!buff)
-		buff = ft_calloc(BUFFER_SIZE + 1, 1);
-	if (!buff)
+	if (!buff[fd])
+		buff[fd] = ft_calloc(BUFFER_SIZE + 1, 1);
+	if (!buff[fd])
 		return (NULL);
-	rl = r_line(fd, &buff);
-	result = _get_line(&buff);
+	rl = r_line(fd, &buff[fd]);
+	result = _get_line(&buff[fd]);
 	if (rl <= 0 && !result[0])
 	{
 		free (result);
-		free (buff);
-		buff = NULL;
+		free (buff[fd]);
+		buff[fd] = NULL;
 		result = NULL;
 		return (NULL);
 	}
 	return (result);
 }
-#include <stdio.h>
-/*int main(void)
+
+#include<stdio.h>
+
+int main(void)
 {
 	int fd =  open ("text", O_RDONLY);
 	char *str = NULL;
@@ -111,17 +113,5 @@ char	*get_next_line(int fd)
 		printf("%s", str);
 		free(str);
 	} while(str);
-	close (fd);
-}*/
-
-int main(void)
-{
-	int fd = open("text", O_RDONLY);
-	char *str = NULL;
-	do{
-			str = get_next_line(fd);
-			printf("%s", str);
-			free(str);
-		} while (str);
 	close (fd);
 }
